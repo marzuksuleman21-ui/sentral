@@ -37,6 +37,13 @@
 
   </div>
 
+  <script>
+console.log("DEBUG: halaman admin dimuat");
+window.onerror = function(msg, src, line, col, err) {
+  alert("JS ERROR:\n" + msg + "\n(" + src + ":" + line + ")");
+};
+  </script>
+
 <script type="module">
 
 import { db, storage } from "./firebase-config.js";
