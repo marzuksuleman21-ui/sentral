@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Orders</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1 style="text-align:center; margin:20px 0;">Daftar Pesanan</h1>
+
+  <div id="ordersList" class="checkout-container"></div>
+
+<script type="module">
+import { db } from "./firebase-config.js";
+import {
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// REFERENSI KOLEKSI
+const ordersRef = collection(db, "orders");
+
+// RENDER PESANAN REALTIME
+onSnapshot(ordersRef, snap => {
+  let html = "";
+
+  snap.forEach(orderDoc => {
+    let order = orderDoc.data();
+    let id = orderDoc.id;
+
+    let time = order.time?.seconds
+      ? new Date(order.time.seconds * 1000).toLocaleString("id-ID")
+      : "Tidak ada waktu";
+
+    let itemsHTML = order.items.map(i => `
+      <div class="checkout-item" style="border:none;">
+        <img src="${i.photo}" class="checkout-img">
+        <div class="info">
+          <h3>${i.name}</h3>
+          <p>Qty: ${i.qty}</p>
+          <p>Subtotal: Rp ${i.qty * i.price}</p>
+        </div>
+      </div>
+    `).join("");
+
+    html += `
+      <div class="order-box" style="
+        background:white; 
+        padding:20px; 
+        border-radius:12px; 
+        margin-bottom:20px;
+        border:1px solid #e5e7eb;
+      ">
+        <h2 style="margin-bottom:8px;">Order ID: ${id}</h2>
+        <p><b>Waktu:</b> ${time}</p>
+
+        <div>${itemsHTML}</div>
+
+        <h2 style="margin-top:10px;">Total: Rp ${order.total}</h2>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="pay-btn" 
+            style="background:#10b981;"
+            onclick="markDone('${id}')">
+            Tandai Selesai
+          </button>
+
+          <button class="delete-btn" 
+            style="padding:12px 18px;" 
+            onclick="deleteOrder('${id}')">
+            Hapus
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("ordersList").innerHTML = html;
+});
+
+// TANDAI ORDER SELESAI
+window.markDone = async id => {
+  if (!confirm("Tandai pesanan selesai?")) return;
+  await updateDoc(doc(db, "orders", id), { status: "done" });
+  alert("Pesanan ditandai selesai.");
+};
+
+// HAPUS ORDER
+window.deleteOrder = async id => {
+  if (!confirm("Yakin hapus pesanan ini?")) return;
+  await deleteDoc(doc(db, "orders", id));
+  alert("Pesanan dihapus.");
+};
+</script>
+
+</body>
+</html>
