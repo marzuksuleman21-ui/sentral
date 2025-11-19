@@ -3,31 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menu Cafe</title>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#10b981">
-  <link rel="stylesheet" href="style.css">
+  <title>Menu</title>
+  <link rel="stylesheet" href="css/menu.css">
 </head>
 <body>
 
-  <header>
-    <h1>OUR MENU</h1>
-    <div id="categoryButtons"></div>
-  </header>
+<h1 class="title">OUR MENU</h1>
 
-  <main>
-    <div id="menuList" class="menu-container"></div>
-  </main>
+<div id="categoryButtons" class="cat-box"></div>
 
-  <div class="cart-btn" onclick="goCheckout()">
-    🛒 <span id="cartCount">0</span>
-  </div)
+<div id="menuList" class="menu-container">Memuat menu...</div>
 
-  <script type="module" src="menu.js"></script>
+<!-- Tombol Keranjang -->
+<div class="cart-btn" onclick="goCheckout()">
+  🛒 <span id="cartCount">0</span>
+</div>
+
+<script src="js/menu.js"></script>
+
 </body>
-  <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
-  </script>
 </html>
