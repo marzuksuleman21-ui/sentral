@@ -39,10 +39,8 @@
 
 <script type="module">
 
-// Import firebase config
 import { db, storage } from "./firebase-config.js";
 
-// Firestore
 import {
   collection,
   addDoc,
@@ -51,18 +49,14 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Storage
 import {
   ref,
   uploadBytes,
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
 
-
-// Referensi koleksi Firestore
 const menusRef = collection(db, "menus");
 
-// Aksi tombol simpan
 document.getElementById("btnSave").onclick = async () => {
   let name = document.getElementById("name").value;
   let category = document.getElementById("category").value;
@@ -75,12 +69,10 @@ document.getElementById("btnSave").onclick = async () => {
   }
 
   try {
-    // Upload gambar
     const storageRef = ref(storage, "menus/" + Date.now() + "-" + file.name);
     await uploadBytes(storageRef, file);
     const photoURL = await getDownloadURL(storageRef);
 
-    // Simpan data Firestore
     await addDoc(menusRef, {
       name,
       category,
@@ -89,15 +81,12 @@ document.getElementById("btnSave").onclick = async () => {
     });
 
     alert("Menu disimpan!");
-
   } catch (err) {
     console.error(err);
     alert("Gagal menyimpan: " + err.message);
   }
 };
 
-
-// Load realtime data
 onSnapshot(menusRef, snap => {
   let html = "";
   snap.forEach(docItem => {
@@ -117,8 +106,6 @@ onSnapshot(menusRef, snap => {
   document.getElementById("menuList").innerHTML = html;
 });
 
-
-// Delete menu
 window.deleteMenu = async (id) => {
   await deleteDoc(doc(db, "menus", id));
   alert("Menu dihapus!");
