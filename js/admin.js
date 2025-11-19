@@ -1,96 +1,114 @@
-const repoOwner = "marzuksuleman21-ui";
-const repoName = "sentral";
-const branch = "main";
-const token = "GITHUB_TOKEN_KAMU"; // nanti gue kasih cara buat bikin token
+// ========================================
+// CONFIG
+// ========================================
+const GITHUB_TOKEN = "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"; // ganti token lo
+const REPO_OWNER = "marzuksuleman21-ui";
+const REPO_NAME = "sentral";
+const BRANCH = "main";
 
-async function uploadImage(file) {
-    const fileName = Date.now() + "-" + file.name;
-    const path = `images/menu/${fileName}`;
+// File paths
+const MENUS_JSON_PATH = "sentral/menus.json";
+const IMAGE_FOLDER = "sentral/images/menu/";
 
-    const content = await fileToBase64(file);
 
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
-        method: "PUT",
+// ========================================
+// HELPER: GitHub API Request
+// ========================================
+async function githubRequest(path, method, body) {
+    const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/${path}`;
+
+    const options = {
+        method,
         headers: {
-            "Authorization": `token ${token}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            message: "Tambah foto menu",
-            content: content.split(",")[1]
-        })
-    });
+            "Authorization": `Bearer ${GITHUB_TOKEN}`,
+            "Accept": "application/vnd.github+json",
+        }
+    };
 
-    const data = await res.json();
-
-    if (data.content && data.content.download_url) {
-        return data.content.download_url;
-    } else {
-        throw new Error("Upload gagal");
-    }
+    if (body) options.body = JSON.stringify(body);
+    let res = await fetch(url, options);
+    return res.json();
 }
 
-function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
+// ========================================
+// LOAD menus.json (latest)
+// ========================================
+async function loadMenus() {
+    const res = await githubRequest(`contents/${MENUS_JSON_PATH}`, "GET");
+    const json = JSON.parse(atob(res.content));
+    return { data: json, sha: res.sha };
+}
+
+// ========================================
+// SAVE image to repo
+// ========================================
+async function uploadImage(file) {
+    return new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
+        reader.onload = async () => {
+            const base64 = reader.result.split(",")[1];
+
+            const fileName = Date.now() + "-" + file.name;
+            const uploadPath = IMAGE_FOLDER + fileName;
+
+            await githubRequest(`contents/${uploadPath}`, "PUT", {
+                message: "Add product image",
+                content: base64,
+                branch: BRANCH
+            });
+
+            resolve("images/menu/" + fileName);
+        };
         reader.readAsDataURL(file);
     });
 }
 
-async function saveMenu(name, category, price, photoURL) {
-    const fileUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${branch}/menus.json`;
-
-    let menus = await fetch(fileUrl).then(r => r.json());
-
-    menus.push({
-        name,
-        category,
-        price,
-        photo: photoURL
-    });
-
-    const updated = btoa(JSON.stringify(menus, null, 2));
-
-    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/menus.json`, {
-        method: "PUT",
-        headers: {
-            "Authorization": `token ${token}`,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            message: "Update menus.json",
-            content: updated,
-            sha: await getCurrentSHA()
-        })
+// ========================================
+// SAVE menus.json (commit update)
+// ========================================
+async function saveMenus(newData, sha) {
+    await githubRequest(`contents/${MENUS_JSON_PATH}`, "PUT", {
+        message: "Update menus.json",
+        content: btoa(JSON.stringify(newData, null, 2)),
+        sha,
+        branch: BRANCH
     });
 }
 
-async function getCurrentSHA() {
-    const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/menus.json`;
-    const res = await fetch(url);
-    const json = await res.json();
-    return json.sha;
-}
-
-// Tombol SIMPAN
+// ========================================
+// HANDLE SAVE PRODUCT
+// ========================================
 document.getElementById("btnSave").onclick = async () => {
-    let name = document.getElementById("name").value;
-    let category = document.getElementById("category").value;
-    let price = document.getElementById("price").value;
-    let file = document.getElementById("photo").files[0];
+    const nama = document.getElementById("name").value;
+    const kategori = document.getElementById("category").value;
+    const harga = document.getElementById("price").value;
+    const file = document.getElementById("photo").files[0];
 
-    if (!name || !price || !file) {
-        alert("Lengkapi semua field");
+    if (!nama || !kategori || !harga || !file) {
+        alert("Lengkapi semua data.");
         return;
     }
 
-    try {
-        let photoURL = await uploadImage(file);
-        await saveMenu(name, category, price, photoURL);
-        alert("Menu berhasil disimpan!");
-    } catch (err) {
-        alert("Gagal: " + err.message);
-    }
+    document.getElementById("btnSave").innerText = "Menyimpan...";
+    document.getElementById("btnSave").disabled = true;
+
+    // Upload image
+    const imgPath = await uploadImage(file);
+
+    // Load menus.json
+    const { data, sha } = await loadMenus();
+
+    // Tambahkan data baru
+    data.push({
+        name: nama,
+        category: kategori,
+        price: harga,
+        photo: imgPath
+    });
+
+    // Save kembali menus.json
+    await saveMenus(data, sha);
+
+    alert("Produk berhasil ditambahkan!");
+    location.reload();
 };
