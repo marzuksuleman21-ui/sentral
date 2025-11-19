@@ -8,63 +8,130 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#10b981">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 15px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0f5132;
+      margin-bottom: 20px;
+    }
+
+    .form-box {
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+    }
+
+    .form-box input,
+    .form-box select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .form-box button {
+      width: 100%;
+      padding: 12px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    h2 {
+      color: #14532d;
+      margin-top: 20px;
+    }
+
+    .menu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .admin-menu-item {
+      background: #fff;
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .admin-menu-img {
+      width: 70px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .admin-info {
+      flex-grow: 1;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 
 <body>
 
-  <div class="admin-header">
-    <h1>Admin Panel</h1>
-  </div>
+<h1>Admin Panel</h1>
 
-  <div class="admin-container">
+<div class="form-box">
+  <input id="name" type="text" placeholder="Nama Produk">
+  <select id="category">
+    <option>Basic Coffee</option>
+    <option>Coffee</option>
+    <option>Mojito</option>
+    <option>Tea & Non-Coffee</option>
+    <option>Bakery & Snacks</option>
+  </select>
+  <input id="price" type="number" placeholder="Harga">
+  <input id="photo" type="file" accept="image/*">
+  <button id="btnSave">Simpan</button>
+</div>
 
-    <div class="form-box mobile-shadow">
-      <input id="name" type="text" placeholder="Nama Produk">
-      <select id="category">
-        <option>Basic Coffee</option>
-        <option>Coffee</option>
-        <option>Mojito</option>
-        <option>Tea & Non-Coffee</option>
-        <option>Bakery & Snacks</option>
-      </select>
-      <input id="price" type="number" placeholder="Harga">
-      <input id="photo" type="file" accept="image/*">
-      <button id="btnSave" class="save-btn">Simpan</button>
-    </div>
+<h2>Daftar Menu</h2>
+<div id="menuList" class="menu-list"></div>
 
-    <h2 class="menu-title">Daftar Menu</h2>
-    <div id="menuList" class="menu-list"></div>
-
-  </div>
-
-  <script>
-console.log("DEBUG: halaman admin dimuat");
-window.onerror = function(msg, src, line, col, err) {
-  alert("JS ERROR:\n" + msg + "\n(" + src + ":" + line + ")");
-};
-  </script>
-
+<!-- FIREBASE LOGIC -->
 <script type="module">
 
 import { db, storage } from "./firebase-config.js";
 
 import {
-  collection,
-  addDoc,
-  deleteDoc,
-  doc,
-  onSnapshot
+  collection, addDoc, deleteDoc, doc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 import {
-  ref,
-  uploadBytes,
-  getDownloadURL
+  ref, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
 
 const menusRef = collection(db, "menus");
 
+// SIMPAN MENU
 document.getElementById("btnSave").onclick = async () => {
+
   let name = document.getElementById("name").value;
   let category = document.getElementById("category").value;
   let price = Number(document.getElementById("price").value);
@@ -76,10 +143,12 @@ document.getElementById("btnSave").onclick = async () => {
   }
 
   try {
+    // upload foto
     const storageRef = ref(storage, "menus/" + Date.now() + "-" + file.name);
     await uploadBytes(storageRef, file);
     const photoURL = await getDownloadURL(storageRef);
 
+    // simpan firestore
     await addDoc(menusRef, {
       name,
       category,
@@ -88,12 +157,18 @@ document.getElementById("btnSave").onclick = async () => {
     });
 
     alert("Menu disimpan!");
+    
+    document.getElementById("name").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("photo").value = "";
+
   } catch (err) {
-    console.error(err);
     alert("Gagal menyimpan: " + err.message);
   }
 };
 
+
+// LOAD REALTIME
 onSnapshot(menusRef, snap => {
   let html = "";
   snap.forEach(docItem => {
@@ -113,6 +188,8 @@ onSnapshot(menusRef, snap => {
   document.getElementById("menuList").innerHTML = html;
 });
 
+
+// DELETE MENU
 window.deleteMenu = async (id) => {
   await deleteDoc(doc(db, "menus", id));
   alert("Menu dihapus!");
@@ -121,6 +198,7 @@ window.deleteMenu = async (id) => {
 </script>
 
 <script>
+  // Service Worker
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
   }
