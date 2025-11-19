@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1 style="text-align:center; margin-top:20px;">Checkout</h1>
+
+  <div id="checkoutList" class="checkout-container"></div>
+
+  <script>
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function renderCheckout() {
+      let box = document.getElementById("checkoutList");
+
+      if (cart.length === 0) {
+        box.innerHTML = `
+          <p style="text-align:center; padding:20px;">Keranjang kosong.</p>
+        `;
+        return;
+      }
+
+      let total = 0;
+
+      box.innerHTML = cart.map(item => {
+        let subtotal = item.price * item.qty;
+        total += subtotal;
+
+        return `
+          <div class="checkout-item">
+            <img src="${item.photo}" class="checkout-img">
+            <div class="info">
+              <h3>${item.name}</h3>
+              <p>Harga: Rp ${item.price}</p>
+              <p>Jumlah: ${item.qty}</p>
+              <p>Subtotal: Rp ${subtotal}</p>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      box.innerHTML += `
+        <hr>
+        <h2>Total Pembayaran: Rp ${total}</h2>
+        <button class="pay-btn" onclick="payNow()">Bayar Sekarang</button>
+      `;
+    }
+
+    function payNow() {
+      alert("Pesanan berhasil diproses!");
+      localStorage.removeItem("cart");
+      window.location.href = "index.html"; 
+    }
+
+    renderCheckout();
+  </script>
+
+  <style>
+    .checkout-container { padding: 20px; }
+    .checkout-item {
+      display: flex; gap: 15px; padding: 12px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .checkout-img {
+      width: 80px; height: 80px; object-fit: cover; border-radius: 8px;
+    }
+    .pay-btn {
+      width: 100%; padding: 15px; margin-top: 20px;
+      background: #16a34a; color: white;
+      font-size: 18px; border: none; border-radius: 10px;
+      cursor: pointer;
+    }
+    .pay-btn:hover { background: #0f9f3c; }
+  </style>
+
+</body>
+</html>
