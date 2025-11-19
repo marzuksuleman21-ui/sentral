@@ -2,12 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin Menu</title>
-
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#10b981">
-  <link rel="stylesheet" href="style.css">
 
   <style>
     body {
@@ -15,13 +11,11 @@
       background: #f5f5f5;
       padding: 15px;
     }
-
     h1 {
       text-align: center;
       color: #0f5132;
       margin-bottom: 20px;
     }
-
     .form-box {
       background: #fff;
       padding: 15px;
@@ -29,17 +23,14 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       margin-bottom: 25px;
     }
-
     .form-box input,
     .form-box select {
       width: 100%;
       padding: 10px;
-      border: 1px solid #ccc;
       border-radius: 8px;
+      border: 1px solid #ccc;
       margin-bottom: 12px;
-      font-size: 16px;
     }
-
     .form-box button {
       width: 100%;
       padding: 12px;
@@ -50,45 +41,36 @@
       font-size: 16px;
       font-weight: bold;
     }
-
-    h2 {
-      color: #14532d;
-      margin-top: 20px;
-    }
-
     .menu-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-
     .admin-menu-item {
-      background: #fff;
+      display: flex;
+      background: white;
       padding: 12px;
       border-radius: 10px;
-      display: flex;
-      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
       gap: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      align-items: center;
     }
-
     .admin-menu-img {
       width: 70px;
       height: 70px;
-      object-fit: cover;
       border-radius: 8px;
+      object-fit: cover;
     }
-
     .admin-info {
       flex-grow: 1;
     }
-
     .delete-btn {
       background: #dc2626;
+      padding: 8px 12px;
       color: white;
       border: none;
-      padding: 8px 12px;
       border-radius: 6px;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -97,6 +79,7 @@
 
 <h1>Admin Panel</h1>
 
+<!-- FORM INPUT -->
 <div class="form-box">
   <input id="name" type="text" placeholder="Nama Produk">
   <select id="category">
@@ -114,7 +97,129 @@
 <h2>Daftar Menu</h2>
 <div id="menuList" class="menu-list"></div>
 
-<script src="js/admin.js"></script>
+
+<!-- ============================= -->
+<!--   FIREBASE SCRIPT MODULE      -->
+<!-- ============================= -->
+
+<script type="module">
+
+/* ===========================
+   IMPORT FIREBASE CONFIG  
+=========================== */
+
+import { app, db, storage, auth } from "./firebase-config.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+import {
+  collection, addDoc, deleteDoc, doc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+import {
+  ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+
+
+/* ===========================
+      PROTEKSI LOGIN ADMIN  
+=========================== */
+
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    // kalau belum login, tendang balik ke login.html
+    location.href = "login.html";
+  }
+});
+
+
+/* ===========================
+       FIRESTORE SETUP  
+=========================== */
+const menusRef = collection(db, "menus");
+
+
+/* ===========================
+         UPLOAD + SAVE
+=========================== */
+
+document.getElementById("btnSave").onclick = async () => {
+
+  let name = document.getElementById("name").value;
+  let category = document.getElementById("category").value;
+  let price = Number(document.getElementById("price").value);
+  let file = document.getElementById("photo").files[0];
+
+  if (!name || !price || !file) {
+    alert("Lengkapi semua field!");
+    return;
+  }
+
+  try {
+    // upload foto
+    const storageRef = ref(storage, "menus/" + Date.now() + "-" + file.name);
+    await uploadBytes(storageRef, file);
+    const photoURL = await getDownloadURL(storageRef);
+
+    // simpan Firestore
+    await addDoc(menusRef, {
+      name,
+      category,
+      price,
+      photo: photoURL
+    });
+
+    alert("Menu disimpan!");
+
+    // reset form
+    document.getElementById("name").value = "";
+    document.getElementById("price").value = "";
+    document.getElementById("photo").value = "";
+
+  } catch (err) {
+    alert("Gagal menyimpan: " + err.message);
+  }
+};
+
+
+/* ===========================
+           REALTIME LIST  
+=========================== */
+
+onSnapshot(menusRef, (snap) => {
+  let html = "";
+  snap.forEach((docItem) => {
+    let m = docItem.data();
+
+    html += `
+      <div class="admin-menu-item">
+        <img src="${m.photo}" class="admin-menu-img">
+        <div class="admin-info">
+          <h3>${m.name}</h3>
+          <p>${m.category}</p>
+          <p>Rp ${m.price}</p>
+        </div>
+        <button class="delete-btn" onclick="deleteMenu('${docItem.id}')">Hapus</button>
+      </div>
+    `;
+  });
+
+  document.getElementById("menuList").innerHTML = html;
+});
+
+
+/* ===========================
+             DELETE
+=========================== */
+
+window.deleteMenu = async (id) => {
+  await deleteDoc(doc(db, "menus", id));
+  alert("Menu dihapus!");
+};
+
+</script>
 
 </body>
 </html>
