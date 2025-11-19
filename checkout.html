@@ -1,24 +1,214 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout</title>
-  <link rel="stylesheet" href="css/checkout.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        text-align: center;
+        padding: 20px 0;
+        color: #0f5132;
+    }
+
+    .cart-container {
+        padding: 15px;
+    }
+
+    .item {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .item img {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .info {
+        flex: 1;
+    }
+
+    .title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #0f5132;
+    }
+
+    .price {
+        margin-top: 4px;
+        font-size: 14px;
+    }
+
+    .qty-control {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .qty-control button {
+        width: 28px;
+        height: 28px;
+        background: #0f5132;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 18px;
+        cursor: pointer;
+    }
+
+    .delete-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .total-box {
+        background: white;
+        margin: 20px;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .total-box h3 {
+        margin: 0;
+        font-size: 20px;
+        color: #0f5132;
+    }
+
+    .total-price {
+        font-size: 22px;
+        margin-top: 10px;
+        font-weight: bold;
+    }
+
+    .btn-wa {
+        display: block;
+        width: calc(100% - 40px);
+        margin: 20px auto;
+        padding: 15px;
+        background: #0f5132;
+        color: white;
+        font-size: 18px;
+        border: none;
+        border-radius: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+    }
+</style>
 </head>
+
 <body>
 
-<h1 class="title">Checkout</h1>
+<h2>Checkout</h2>
 
-<div id="cartItems">Memuat...</div>
+<div class="cart-container" id="cartList"></div>
 
-<hr>
+<div class="total-box">
+    <h3>Total Pembayaran</h3>
+    <div class="total-price" id="totalPrice">Rp 0</div>
+</div>
 
-<h2 id="total" class="total-price">Total Pembayaran: Rp 0</h2>
+<button class="btn-wa" onclick="sendWA()">Buat Pesanan via WhatsApp</button>
 
-<button class="pay-btn" onclick="payNow()">Bayar Sekarang</button>
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-<script src="js/checkout.js"></script>
+if (cart.length === 0) {
+    window.location.href = "menu.html";
+}
+
+function renderCart() {
+    const container = document.getElementById("cartList");
+    container.innerHTML = "";
+
+    cart.forEach((item, index) => {
+        let div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+            <img src="${item.image}">
+            <div class="info">
+                <div class="title">${item.name}</div>
+                <div class="price">Rp ${item.price}</div>
+                <div class="qty-control">
+                    <button onclick="changeQty(${index}, -1)">−</button>
+                    <span>${item.qty}</span>
+                    <button onclick="changeQty(${index}, 1)">+</button>
+                </div>
+            </div>
+            <button class="delete-btn" onclick="deleteItem(${index})">🗑️</button>
+        `;
+        container.appendChild(div);
+    });
+
+    updateTotal();
+}
+
+function changeQty(idx, amount) {
+    cart[idx].qty += amount;
+
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
+
+    saveCart();
+}
+
+function deleteItem(idx) {
+    cart.splice(idx, 1);
+    saveCart();
+}
+
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    if (cart.length === 0) {
+        window.location.href = "menu.html";
+    } else {
+        renderCart();
+    }
+}
+
+function updateTotal() {
+    let total = cart.reduce((a, b) => a + (b.qty * b.price), 0);
+    document.getElementById("totalPrice").innerText = "Rp " + total.toLocaleString();
+}
+
+function sendWA() {
+    let text = "*PESANAN BARU*\n\n";
+
+    cart.forEach(item => {
+        text += `• ${item.name} x${item.qty} = Rp ${(item.qty * item.price).toLocaleString()}\n`;
+    });
+
+    let total = cart.reduce((a, b) => a + (b.qty * b.price), 0);
+
+    text += `\nTotal: Rp ${total.toLocaleString()}`;
+    text += `\n\nMohon konfirmasi pesanan ya!`;
+
+    let waUrl = "https://wa.me/628xxxxxxx?text=" + encodeURIComponent(text);
+    window.open(waUrl, "_blank");
+}
+
+renderCart();
+</script>
 
 </body>
 </html>
