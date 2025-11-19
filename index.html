@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=menu.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Loading...</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f9fafb;
+      font-family: sans-serif;
+      color: #065f46;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  Mengarahkan ke menu...
+
+  <script>
+    // fallback kalau meta refresh malas bekerja
+    setTimeout(() => {
+      window.location.href = "menu.html";
+    }, 100);
+    
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+
+</body>
+</html>
