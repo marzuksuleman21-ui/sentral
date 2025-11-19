@@ -1,225 +1,120 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Menu</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="css/style.css">
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 15px;
+      padding: 20px;
+      background: #f4f4f4;
     }
+
     h1 {
       text-align: center;
       color: #0f5132;
       margin-bottom: 20px;
     }
+
     .form-box {
-      background: #fff;
+      background: white;
       padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       margin-bottom: 25px;
     }
-    .form-box input,
-    .form-box select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 12px;
-    }
-    .form-box button {
+
+    input, select {
       width: 100%;
       padding: 12px;
-      background: #10b981;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #0f5132;
       color: white;
       border: none;
       border-radius: 8px;
       font-size: 16px;
-      font-weight: bold;
+      margin-top: 10px;
     }
-    .menu-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+
+    button:disabled {
+      opacity: 0.5;
     }
-    .admin-menu-item {
+
+    h2 {
+      color: #0f5132;
+      margin-top: 30px;
+    }
+
+    #menuList {
+      margin-top: 10px;
+    }
+
+    .menu-item {
       display: flex;
+      align-items: center;
+      gap: 15px;
       background: white;
       padding: 12px;
       border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      gap: 12px;
-      align-items: center;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .admin-menu-img {
+
+    .menu-item img {
       width: 70px;
       height: 70px;
       border-radius: 8px;
       object-fit: cover;
     }
-    .admin-info {
-      flex-grow: 1;
-    }
-    .delete-btn {
-      background: #dc2626;
-      padding: 8px 12px;
-      color: white;
-      border: none;
+
+    .menu-item button {
+      background: red;
+      padding: 7px 12px;
       border-radius: 6px;
       font-size: 14px;
+      width: auto;
     }
   </style>
 </head>
 
 <body>
 
-<h1>Admin Panel</h1>
+  <h1>Admin Panel</h1>
 
-<!-- FORM INPUT -->
-<div class="form-box">
-  <input id="name" type="text" placeholder="Nama Produk">
-  <select id="category">
-    <option>Basic Coffee</option>
-    <option>Coffee</option>
-    <option>Mojito</option>
-    <option>Tea & Non-Coffee</option>
-    <option>Bakery & Snacks</option>
-  </select>
-  <input id="price" type="number" placeholder="Harga">
-  <input id="photo" type="file" accept="image/*">
-  <button id="btnSave">Simpan</button>
-</div>
+  <!-- FORM INPUT PRODUK -->
+  <div class="form-box">
+    <input id="name" type="text" placeholder="Nama Produk">
+    
+    <select id="category">
+      <option>Basic Coffee</option>
+      <option>Coffee</option>
+      <option>Mojito</option>
+      <option>Tea & Non-Coffee</option>
+      <option>Bakery & Snacks</option>
+    </select>
 
-<h2>Daftar Menu</h2>
-<div id="menuList" class="menu-list"></div>
+    <input id="price" type="number" placeholder="Harga">
+    <input id="photo" type="file" accept="image/*">
+    
+    <button id="btnSave">Simpan Produk</button>
+  </div>
 
+  <!-- LIST MENU -->
+  <h2>Daftar Menu</h2>
+  <div id="menuList">Memuat...</div>
 
-<!-- ============================= -->
-<!--   FIREBASE SCRIPT MODULE      -->
-<!-- ============================= -->
-
-<script type="module">
-
-/* ===========================
-   IMPORT FIREBASE CONFIG  
-=========================== */
-
-import { app, db, storage, auth } from "./firebase-config.js";
-
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-
-import {
-  collection, addDoc, deleteDoc, doc, onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
-
-import {
-  ref, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
-
-
-/* ===========================
-      PROTEKSI LOGIN ADMIN  
-=========================== */
-
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    // kalau belum login, tendang balik ke login.html
-    location.href = "login.html";
-  }
-});
-
-
-/* ===========================
-       FIRESTORE SETUP  
-=========================== */
-const menusRef = collection(db, "menus");
-
-
-/* ===========================
-         UPLOAD + SAVE
-=========================== */
-
-document.getElementById("btnSave").onclick = async () => {
-
-  let name = document.getElementById("name").value;
-  let category = document.getElementById("category").value;
-  let price = Number(document.getElementById("price").value);
-  let file = document.getElementById("photo").files[0];
-
-  if (!name || !price || !file) {
-    alert("Lengkapi semua field!");
-    return;
-  }
-
-  try {
-    // upload foto
-    const storageRef = ref(storage, "menus/" + Date.now() + "-" + file.name);
-    await uploadBytes(storageRef, file);
-    const photoURL = await getDownloadURL(storageRef);
-
-    // simpan Firestore
-    await addDoc(menusRef, {
-      name,
-      category,
-      price,
-      photo: photoURL
-    });
-
-    alert("Menu disimpan!");
-
-    // reset form
-    document.getElementById("name").value = "";
-    document.getElementById("price").value = "";
-    document.getElementById("photo").value = "";
-
-  } catch (err) {
-    alert("Gagal menyimpan: " + err.message);
-  }
-};
-
-
-/* ===========================
-           REALTIME LIST  
-=========================== */
-
-onSnapshot(menusRef, (snap) => {
-  let html = "";
-  snap.forEach((docItem) => {
-    let m = docItem.data();
-
-    html += `
-      <div class="admin-menu-item">
-        <img src="${m.photo}" class="admin-menu-img">
-        <div class="admin-info">
-          <h3>${m.name}</h3>
-          <p>${m.category}</p>
-          <p>Rp ${m.price}</p>
-        </div>
-        <button class="delete-btn" onclick="deleteMenu('${docItem.id}')">Hapus</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("menuList").innerHTML = html;
-});
-
-
-/* ===========================
-             DELETE
-=========================== */
-
-window.deleteMenu = async (id) => {
-  await deleteDoc(doc(db, "menus", id));
-  alert("Menu dihapus!");
-};
-
-</script>
+  <!-- ADMIN JS -->
+  <script src="js/admin.js"></script>
 
 </body>
 </html>
