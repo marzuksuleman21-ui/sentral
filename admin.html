@@ -1,32 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Menu</title>
+
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#10b981">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Admin Panel</h1>
-
-<div class="form-box">
-  <input id="name" type="text" placeholder="Nama Produk">
-  <select id="category">
-    <option>Basic Coffee</option>
-    <option>Coffee</option>
-    <option>Mojito</option>
-    <option>Tea & Non-Coffee</option>
-    <option>Bakery & Snacks</option>
-  </select>
-  <input id="price" type="number" placeholder="Harga">
-  <input id="photo" type="file" accept="image/*">
-  <button id="btnSave">Simpan</button>
+<div class="admin-header">
+  <h1>Admin Panel</h1>
 </div>
 
-<h2>Daftar Menu</h2>
-<div id="menuList"></div>
+<div class="admin-container">
+
+  <div class="form-box mobile-shadow">
+    <input id="name" type="text" placeholder="Nama Produk">
+    <select id="category">
+      <option>Basic Coffee</option>
+      <option>Coffee</option>
+      <option>Mojito</option>
+      <option>Tea & Non-Coffee</option>
+      <option>Bakery & Snacks</option>
+    </select>
+    <input id="price" type="number" placeholder="Harga">
+    <input id="photo" type="file" accept="image/*">
+    <button id="btnSave" class="save-btn">Simpan</button>
+  </div>
+
+  <h2 class="menu-title">Daftar Menu</h2>
+  <div id="menuList" class="menu-list"></div>
+
+</div>
 
 <script type="module">
 import { db, storage } from "./firebase-config.js";
@@ -73,28 +81,31 @@ onSnapshot(menusRef, snap => {
   snap.forEach(docItem => {
     let m = docItem.data();
     html += `
-      <div class="menu-item">
-        <img src="${m.photo}" class="menu-img-small">
-        <h3>${m.name}</h3>
-        <p>${m.category}</p>
-        <p>Rp ${m.price}</p>
-        <button onclick="deleteMenu('${docItem.id}')">Hapus</button>
+      <div class="admin-menu-item">
+        <img src="${m.photo}" class="admin-menu-img">
+        <div class="admin-info">
+          <h3>${m.name}</h3>
+          <p>${m.category}</p>
+          <p>Rp ${m.price}</p>
+        </div>
+        <button class="delete-btn" onclick="deleteMenu('${docItem.id}')">Hapus</button>
       </div>
     `;
   });
   document.getElementById("menuList").innerHTML = html;
 });
 
-// DELETE
 window.deleteMenu = async (id) => {
   await deleteDoc(doc(db, "menus", id));
   alert("Menu dihapus");
 };
 </script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
 </body>
-  <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
-  </script>
 </html>
