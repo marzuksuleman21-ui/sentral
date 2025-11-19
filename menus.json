@@ -1,1 +1,156 @@
-[]
+[
+  {
+    "name": "Kopi Jahe",
+    "category": "Basic Coffee",
+    "price": 5000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Kopi Jahe +",
+    "category": "Basic Coffee",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Susu",
+    "category": "Basic Coffee",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Kopi Susu",
+    "category": "Basic Coffee",
+    "price": 7000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Vietnam Drip",
+    "category": "Basic Coffee",
+    "price": 10000,
+    "photo": "images/menu/default.png"
+  },
+
+  {
+    "name": "Pandan Late",
+    "category": "Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Vanilla Late",
+    "category": "Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Spanish Late",
+    "category": "Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Hezelnut Late",
+    "category": "Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Gula Aren Late",
+    "category": "Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Marie Legak Late",
+    "category": "Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Salted Caramel Latte",
+    "category": "Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+
+  {
+    "name": "Melon Squash",
+    "category": "Mojito",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Orange Squash",
+    "category": "Mojito",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Manggo Squash",
+    "category": "Mojito",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+
+  {
+    "name": "Red Velvet",
+    "category": "Tea & Non-Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Oreo Milo Lava",
+    "category": "Tea & Non-Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Matcha Late",
+    "category": "Tea & Non-Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Tarro Late",
+    "category": "Tea & Non-Coffee",
+    "price": 15000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Chocolatos",
+    "category": "Tea & Non-Coffee",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Beng-Beng",
+    "category": "Tea & Non-Coffee",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+
+  {
+    "name": "Kebab",
+    "category": "Bakery & Snacks",
+    "price": 7000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Indomie",
+    "category": "Bakery & Snacks",
+    "price": 8000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Roti Maryam",
+    "category": "Bakery & Snacks",
+    "price": 10000,
+    "photo": "images/menu/default.png"
+  },
+  {
+    "name": "Mie Nyeme",
+    "category": "Bakery & Snacks",
+    "price": 10000,
+    "photo": "images/menu/default.png"
+  }
+]
