@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Menu</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Admin Panel</h1>
+
+<div class="form-box">
+  <input id="name" type="text" placeholder="Nama Produk">
+  <select id="category">
+    <option>Basic Coffee</option>
+    <option>Coffee</option>
+    <option>Mojito</option>
+    <option>Tea & Non-Coffee</option>
+    <option>Bakery & Snacks</option>
+  </select>
+  <input id="price" type="number" placeholder="Harga">
+  <input id="photo" type="file" accept="image/*">
+  <button id="btnSave">Simpan</button>
+</div>
+
+<h2>Daftar Menu</h2>
+<div id="menuList"></div>
+
+<script type="module">
+import { db, storage } from "./firebase-config.js";
+import {
+  collection, addDoc, deleteDoc, doc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+import {
+  ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+const menusRef = collection(db, "menus");
+
+document.getElementById("btnSave").onclick = async () => {
+  let name = document.getElementById("name").value;
+  let category = document.getElementById("category").value;
+  let price = Number(document.getElementById("price").value);
+  let file = document.getElementById("photo").files[0];
+
+  if (!name || !price || !file) {
+    alert("Lengkapi semua field!");
+    return;
+  }
+
+  // upload foto ke storage
+  const storageRef = ref(storage, "menus/" + Date.now() + "-" + file.name);
+  await uploadBytes(storageRef, file);
+  const photoURL = await getDownloadURL(storageRef);
+
+  // simpan data menu
+  await addDoc(menusRef, {
+    name,
+    category,
+    price,
+    photo: photoURL
+  });
+
+  alert("Menu disimpan!");
+};
+
+// realtime load data
+onSnapshot(menusRef, snap => {
+  let html = "";
+  snap.forEach(docItem => {
+    let m = docItem.data();
+    html += `
+      <div class="menu-item">
+        <img src="${m.photo}" class="menu-img-small">
+        <h3>${m.name}</h3>
+        <p>${m.category}</p>
+        <p>Rp ${m.price}</p>
+        <button onclick="deleteMenu('${docItem.id}')">Hapus</button>
+      </div>
+    `;
+  });
+  document.getElementById("menuList").innerHTML = html;
+});
+
+// DELETE
+window.deleteMenu = async (id) => {
+  await deleteDoc(doc(db, "menus", id));
+  alert("Menu dihapus");
+};
+</script>
+</body>
+</html>
