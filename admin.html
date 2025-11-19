@@ -9,45 +9,60 @@
   <meta name="theme-color" content="#10b981">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="admin-header">
-  <h1>Admin Panel</h1>
-</div>
-
-<div class="admin-container">
-
-  <div class="form-box mobile-shadow">
-    <input id="name" type="text" placeholder="Nama Produk">
-    <select id="category">
-      <option>Basic Coffee</option>
-      <option>Coffee</option>
-      <option>Mojito</option>
-      <option>Tea & Non-Coffee</option>
-      <option>Bakery & Snacks</option>
-    </select>
-    <input id="price" type="number" placeholder="Harga">
-    <input id="photo" type="file" accept="image/*">
-    <button id="btnSave" class="save-btn">Simpan</button>
+  <div class="admin-header">
+    <h1>Admin Panel</h1>
   </div>
 
-  <h2 class="menu-title">Daftar Menu</h2>
-  <div id="menuList" class="menu-list"></div>
+  <div class="admin-container">
 
-</div>
+    <div class="form-box mobile-shadow">
+      <input id="name" type="text" placeholder="Nama Produk">
+      <select id="category">
+        <option>Basic Coffee</option>
+        <option>Coffee</option>
+        <option>Mojito</option>
+        <option>Tea & Non-Coffee</option>
+        <option>Bakery & Snacks</option>
+      </select>
+      <input id="price" type="number" placeholder="Harga">
+      <input id="photo" type="file" accept="image/*">
+      <button id="btnSave" class="save-btn">Simpan</button>
+    </div>
+
+    <h2 class="menu-title">Daftar Menu</h2>
+    <div id="menuList" class="menu-list"></div>
+
+  </div>
 
 <script type="module">
+
+// Import firebase config
 import { db, storage } from "./firebase-config.js";
-import {
-  collection, addDoc, deleteDoc, doc, onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// Firestore
 import {
-  ref, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
+// Storage
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-storage.js";
+
+
+// Referensi koleksi Firestore
 const menusRef = collection(db, "menus");
 
+// Aksi tombol simpan
 document.getElementById("btnSave").onclick = async () => {
   let name = document.getElementById("name").value;
   let category = document.getElementById("category").value;
@@ -59,23 +74,30 @@ document.getElementById("btnSave").onclick = async () => {
     return;
   }
 
-  // upload foto ke storage
-  const storageRef = ref(storage, "menus/" + Date.now() + "-" + file.name);
-  await uploadBytes(storageRef, file);
-  const photoURL = await getDownloadURL(storageRef);
+  try {
+    // Upload gambar
+    const storageRef = ref(storage, "menus/" + Date.now() + "-" + file.name);
+    await uploadBytes(storageRef, file);
+    const photoURL = await getDownloadURL(storageRef);
 
-  // simpan data menu
-  await addDoc(menusRef, {
-    name,
-    category,
-    price,
-    photo: photoURL
-  });
+    // Simpan data Firestore
+    await addDoc(menusRef, {
+      name,
+      category,
+      price,
+      photo: photoURL
+    });
 
-  alert("Menu disimpan!");
+    alert("Menu disimpan!");
+
+  } catch (err) {
+    console.error(err);
+    alert("Gagal menyimpan: " + err.message);
+  }
 };
 
-// realtime load data
+
+// Load realtime data
 onSnapshot(menusRef, snap => {
   let html = "";
   snap.forEach(docItem => {
@@ -95,16 +117,19 @@ onSnapshot(menusRef, snap => {
   document.getElementById("menuList").innerHTML = html;
 });
 
+
+// Delete menu
 window.deleteMenu = async (id) => {
   await deleteDoc(doc(db, "menus", id));
-  alert("Menu dihapus");
+  alert("Menu dihapus!");
 };
+
 </script>
 
 <script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
 </script>
 
 </body>
