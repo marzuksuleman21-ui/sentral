@@ -1,25 +1,221 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menu</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f6f6f6;
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 26px;
+        margin-top: 20px;
+        color: #0f5132;
+    }
+
+    .category-tabs {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 10px;
+        justify-content: center;
+    }
+
+    .category-tabs button {
+        padding: 10px 16px;
+        border: 2px solid #0f5132;
+        border-radius: 25px;
+        background: white;
+        color: #0f5132;
+        font-weight: bold;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .category-tabs button.active {
+        background: #0f5132;
+        color: white;
+    }
+
+    .menu-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 15px;
+        padding: 20px;
+        padding-bottom: 140px; /* agar tidak ketutup keranjang */
+    }
+
+    .card {
+        background: white;
+        border-radius: 16px;
+        padding: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .card img {
+        width: 100%;
+        height: 140px;
+        object-fit: cover;
+        border-radius: 12px;
+        background: #eee;
+    }
+
+    .title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 8px;
+        color: #0f5132;
+    }
+
+    .price {
+        font-size: 16px;
+        margin: 6px 0;
+        color: #333;
+    }
+
+    .btn-add {
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: #0f5132;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        width: 100%;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    /* Floating cart button */
+    .cart-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 25px;
+        background: #0f5132;
+        color: white;
+        padding: 16px 22px;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        cursor: pointer;
+    }
+</style>
+
 </head>
 <body>
 
-<h1 class="title">OUR MENU</h1>
+<h2>Menu</h2>
 
-<div id="categoryButtons" class="cat-box"></div>
+<div class="category-tabs" id="categoryTabs"></div>
 
-<div id="menuList" class="menu-container">Memuat menu...</div>
-
-<!-- Tombol Keranjang -->
-<div class="cart-btn" onclick="goCheckout()">
-  🛒 <span id="cartCount">0</span>
+<div class="menu-container" id="menuList">
+    Memuat menu...
 </div>
 
-<script src="js/menu.js"></script>
+<!-- Floating cart button -->
+<div class="cart-btn" onclick="goCheckout()">
+    🛒 <span id="cartCount">0</span>
+</div>
+
+<script>
+const MENU_URL = "menus.json"; // json lo
+
+let allMenus = [];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+// ========== LOAD MENU ==========
+fetch(MENU_URL)
+    .then(res => res.json())
+    .then(data => {
+        allMenus = data;
+        loadCategories();
+        showMenu("Basic Coffee");
+        updateCartUI();
+    });
+
+// ========== CATEGORY TABS ==========
+function loadCategories() {
+    const container = document.getElementById("categoryTabs");
+    const categories = [...new Set(allMenus.map(m => m.category))];
+
+    container.innerHTML = "";
+    categories.forEach((cat, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = cat;
+        btn.classList.toggle("active", index === 0);
+        btn.onclick = () => showMenu(cat, btn);
+        container.appendChild(btn);
+    });
+}
+
+// ========== TAMPILKAN MENU BERDASARKAN KATEGORI ==========
+function showMenu(category, activeBtn = null) {
+    const container = document.getElementById("menuList");
+    container.innerHTML = "";
+
+    if (activeBtn) {
+        document.querySelectorAll(".category-tabs button")
+            .forEach(btn => btn.classList.remove("active"));
+        activeBtn.classList.add("active");
+    }
+
+    let filtered = allMenus.filter(m => m.category === category);
+
+    filtered.forEach(item => {
+        let card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <div class="title">${item.name}</div>
+            <div class="price">Rp ${item.price}</div>
+            <button class="btn-add" onclick="addToCart(${item.id})">
+                Tambah
+            </button>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+// ========== TAMBAH KE KERANJANG ==========
+function addToCart(id) {
+    let item = allMenus.find(m => m.id === id);
+    let exist = cart.find(c => c.id === id);
+
+    if (exist) {
+        exist.qty += 1;
+    } else {
+        cart.push({ ...item, qty: 1 });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartUI();
+}
+
+// ========== UPDATE UI CART ==========
+function updateCartUI() {
+    let totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
+    document.getElementById("cartCount").innerText = totalQty;
+}
+
+// ========== KE HALAMAN CHECKOUT ==========
+function goCheckout() {
+    window.location.href = "checkout.html";
+}
+</script>
 
 </body>
 </html>
