@@ -12,71 +12,156 @@
 
   <div id="checkoutList" class="checkout-container"></div>
 
-  <script>
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  <div style="padding:20px;">
+    <button class="pay-btn" id="btnPay">Bayar & Simpan Pesanan</button>
+    <button class="pay-btn" id="btnWA" style="background:#0ea5e9;">Kirim WhatsApp</button>
+    <button class="pay-btn" id="btnPDF" style="background:#6d28d9;">Cetak Struk PDF</button>
+  </div>
 
-    function renderCheckout() {
-      let box = document.getElementById("checkoutList");
+<script type="module">
+// FIREBASE
+import { db } from "./firebase-config.js";
+import {
+  collection, addDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      if (cart.length === 0) {
-        box.innerHTML = `
-          <p style="text-align:center; padding:20px;">Keranjang kosong.</p>
-        `;
-        return;
-      }
+let ordersRef = collection(db, "orders");
 
-      let total = 0;
+// CART
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-      box.innerHTML = cart.map(item => {
-        let subtotal = item.price * item.qty;
-        total += subtotal;
+// RENDER CHECKOUT
+function renderCheckout() {
+  let box = document.getElementById("checkoutList");
 
-        return `
-          <div class="checkout-item">
-            <img src="${item.photo}" class="checkout-img">
-            <div class="info">
-              <h3>${item.name}</h3>
-              <p>Harga: Rp ${item.price}</p>
-              <p>Jumlah: ${item.qty}</p>
-              <p>Subtotal: Rp ${subtotal}</p>
-            </div>
+  if (cart.length === 0) {
+    box.innerHTML = `<p style="text-align:center; padding:20px;">Keranjang kosong.</p>`;
+    return;
+  }
+
+  let total = 0;
+
+  box.innerHTML = cart.map((item, i) => {
+    let subtotal = item.price * item.qty;
+    total += subtotal;
+    return `
+      <div class="checkout-item">
+        <img src="${item.photo}" class="checkout-img">
+        <div class="info">
+          <h3>${item.name}</h3>
+          <p>Harga: Rp ${item.price}</p>
+
+          <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+            <button class="qty-btn" onclick="changeQty(${i}, -1)">−</button>
+            <span>${item.qty}</span>
+            <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
           </div>
-        `;
-      }).join("");
 
-      box.innerHTML += `
-        <hr>
-        <h2>Total Pembayaran: Rp ${total}</h2>
-        <button class="pay-btn" onclick="payNow()">Bayar Sekarang</button>
-      `;
-    }
+          <p>Subtotal: Rp ${subtotal}</p>
+        </div>
 
-    function payNow() {
-      alert("Pesanan berhasil diproses!");
-      localStorage.removeItem("cart");
-      window.location.href = "index.html"; 
-    }
+        <button class="delete-btn" onclick="removeItem(${i})">X</button>
+      </div>
+    `;
+  }).join("");
 
-    renderCheckout();
-  </script>
+  box.innerHTML += `
+    <hr>
+    <h2>Total Pembayaran: Rp ${total}</h2>
+  `;
 
-  <style>
-    .checkout-container { padding: 20px; }
-    .checkout-item {
-      display: flex; gap: 15px; padding: 12px 0;
-      border-bottom: 1px solid #ddd;
-    }
-    .checkout-img {
-      width: 80px; height: 80px; object-fit: cover; border-radius: 8px;
-    }
-    .pay-btn {
-      width: 100%; padding: 15px; margin-top: 20px;
-      background: #16a34a; color: white;
-      font-size: 18px; border: none; border-radius: 10px;
-      cursor: pointer;
-    }
-    .pay-btn:hover { background: #0f9f3c; }
-  </style>
+  return total;
+}
+
+// UBAH QTY
+window.changeQty = (index, val) => {
+  cart[index].qty += val;
+  if (cart[index].qty < 1) cart[index].qty = 1;
+  saveCart();
+};
+
+// HAPUS ITEM
+window.removeItem = index => {
+  cart.splice(index, 1);
+  saveCart();
+};
+
+// SIMPAN CART
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCheckout();
+}
+
+// SIMPAN ORDER KE FIREBASE
+async function saveOrder() {
+  let total = renderCheckout();
+
+  const order = {
+    items: cart,
+    total: total,
+    time: serverTimestamp()
+  };
+
+  await addDoc(ordersRef, order);
+  alert("Pesanan disimpan ke Firebase!");
+
+  localStorage.removeItem("cart");
+  window.location.href = "index.html";
+}
+
+// KIRIM WHATSAPP
+function sendWhatsApp() {
+  let text = "*Pesanan Baru:*\n\n";
+  cart.forEach(item => {
+    text += `• ${item.name} x${item.qty} = Rp ${item.price * item.qty}\n`;
+  });
+  text += `\nTotal: Rp ${renderCheckout()}`;
+
+  let url = "https://wa.me/?text=" + encodeURIComponent(text);
+  window.open(url, "_blank");
+}
+
+// CETAK PDF
+function printPDF() {
+  let printContent = document.getElementById("checkoutList").innerHTML;
+  let w = window.open("");
+  w.document.write("<html><head><title>Struk Pembayaran</title></head><body>");
+  w.document.write(printContent);
+  w.document.write("</body></html>");
+  w.document.close();
+  w.print();
+}
+
+// EVENT BUTTONS
+document.getElementById("btnPay").onclick = saveOrder;
+document.getElementById("btnWA").onclick = sendWhatsApp;
+document.getElementById("btnPDF").onclick = printPDF;
+
+// RUN
+renderCheckout();
+
+</script>
+
+<style>
+.qty-btn {
+  padding: 4px 10px;
+  border: none;
+  background: #059669;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  height: fit-content;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
 
 </body>
 </html>
