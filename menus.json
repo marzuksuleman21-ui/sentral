@@ -3,154 +3,148 @@
     "name": "Kopi Jahe",
     "category": "Basic Coffee",
     "price": 5000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/kopi-jahe.jpg"
   },
   {
-    "name": "Kopi Jahe +",
+    "name": "Kopi Jahe + Susu",
     "category": "Basic Coffee",
     "price": 8000,
-    "photo": "images/menu/default.png"
-  },
-  {
-    "name": "Susu",
-    "category": "Basic Coffee",
-    "price": 8000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/kopi-jahe-susu.jpg"
   },
   {
     "name": "Kopi Susu",
     "category": "Basic Coffee",
     "price": 7000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/kopi-susu.jpg"
   },
   {
     "name": "Vietnam Drip",
     "category": "Basic Coffee",
     "price": 10000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/vietnam-drip.jpg"
   },
 
   {
     "name": "Pandan Late",
     "category": "Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/pandan-late.jpg"
   },
   {
     "name": "Vanilla Late",
     "category": "Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/vanilla-late.jpg"
   },
   {
     "name": "Spanish Late",
     "category": "Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/spanish-late.jpg"
   },
   {
     "name": "Hezelnut Late",
     "category": "Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/hezelnut-late.jpg"
   },
   {
     "name": "Gula Aren Late",
     "category": "Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/gula-aren-late.jpg"
   },
   {
     "name": "Marie Legak Late",
     "category": "Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/marie-legak-late.jpg"
   },
   {
     "name": "Salted Caramel Latte",
     "category": "Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/salted-caramel-latte.jpg"
   },
 
   {
     "name": "Melon Squash",
     "category": "Mojito",
     "price": 8000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/melon-squash.jpg"
   },
   {
     "name": "Orange Squash",
     "category": "Mojito",
     "price": 8000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/orange-squash.jpg"
   },
   {
     "name": "Manggo Squash",
     "category": "Mojito",
     "price": 8000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/manggo-squash.jpg"
   },
 
   {
     "name": "Red Velvet",
     "category": "Tea & Non-Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/red-velvet.jpg"
   },
   {
     "name": "Oreo Milo Lava",
     "category": "Tea & Non-Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/oreo-milo-lava.jpg"
   },
   {
     "name": "Matcha Late",
     "category": "Tea & Non-Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/matcha-late.jpg"
   },
   {
     "name": "Tarro Late",
     "category": "Tea & Non-Coffee",
     "price": 15000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/tarro-late.jpg"
   },
   {
     "name": "Chocolatos",
     "category": "Tea & Non-Coffee",
     "price": 8000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/chocolatos.jpg"
   },
   {
     "name": "Beng-Beng",
     "category": "Tea & Non-Coffee",
     "price": 8000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/beng-beng.jpg"
   },
 
   {
     "name": "Kebab",
     "category": "Bakery & Snacks",
-    "price": 7000,
-    "photo": "images/menu/default.png"
+    "price": 10000,
+    "photo": "images/menu/kebab.jpg"
   },
   {
     "name": "Indomie",
     "category": "Bakery & Snacks",
     "price": 8000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/indomie.jpg"
   },
   {
     "name": "Roti Maryam",
     "category": "Bakery & Snacks",
     "price": 10000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/roti-maryam.jpg"
   },
   {
     "name": "Mie Nyeme",
     "category": "Bakery & Snacks",
     "price": 10000,
-    "photo": "images/menu/default.png"
+    "photo": "images/menu/mie-nyeme.jpg"
   }
 ]
